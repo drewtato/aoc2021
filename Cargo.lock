@@ -73,7 +73,9 @@ checksum = "5827cebf4670468b8772dd191856768aedcb1b0278a04f989f7766351917b9dc"
 name = "day01"
 version = "0.1.0"
 dependencies = [
+ "helpers",
  "itertools",
+ "regex",
 ]
 
 [[package]]
@@ -218,6 +220,10 @@ name = "hashbrown"
 version = "0.11.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ab5ef0d4909ef3724cc8cce6ccc8572c5c817592e9285f5464f8e86f8bd3726e"
+
+[[package]]
+name = "helpers"
+version = "0.1.0"
 
 [[package]]
 name = "hermit-abi"

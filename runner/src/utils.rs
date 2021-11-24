@@ -1,8 +1,8 @@
 use std::{
 	fs::{create_dir_all, read_dir, File},
-	io::Write,
+	io::{copy, Read, Write},
 	path::{Path, PathBuf},
-	process::Command,
+	process::{Command, Stdio},
 };
 
 use crate::Result;
@@ -50,6 +50,28 @@ pub fn write_to_file<P: AsRef<Path>>(s: &str, path: P) -> Result<()> {
 	let mut f = File::create(path.as_ref())?;
 	write!(f, "{s}")?;
 	Ok(())
+}
+
+pub fn cargo_in<I, S, P, R>(args: I, dir: P, mut inp: R) -> Result<()>
+where
+	I: IntoIterator<Item = S>,
+	S: AsRef<std::ffi::OsStr>,
+	P: AsRef<Path>,
+	R: Read,
+{
+	let mut child = Command::new("cargo")
+		.current_dir(dir)
+		.args(args)
+		.stdin(Stdio::piped())
+		.spawn()?;
+	copy(&mut inp, &mut child.stdin.take().unwrap())?;
+
+	let status = child.wait()?;
+	if !status.success() {
+		Err("Cargo failed".into())
+	} else {
+		Ok(())
+	}
 }
 
 pub fn cargo<I, S, P>(args: I, dir: P) -> Result<()>
