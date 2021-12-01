@@ -52,7 +52,7 @@ fn main() -> Result<()> {
 	}
 
 	if args.contains("-t") {
-		test_inp(day, &project_root, release)
+		test_run(day, &project_root, release)
 	} else {
 		run(day, &project_root, release)
 	}?;
@@ -61,24 +61,23 @@ fn main() -> Result<()> {
 }
 
 fn run(day: u32, project_root: &Path, release: bool) -> Result<()> {
-	eprintln!(
-		"Running day {day} in {} with real input",
-		if release { "release" } else { "debug" }
-	);
-	let input_file = File::open(project_root.join(format!("inputs/day{day:02}.txt")))?;
-	run_with_input(day, project_root, input_file, release)
+	run_with_input(day, project_root, true, release)
 }
 
-fn test_inp(day: u32, project_root: &Path, release: bool) -> Result<()> {
-	eprintln!(
-		"Running day {day} in {} with test input",
-		if release { "release" } else { "debug" }
-	);
-	let input_file = File::open(project_root.join(format!("inputs/test{day:02}.txt")))?;
-	run_with_input(day, project_root, input_file, release)
+fn test_run(day: u32, project_root: &Path, release: bool) -> Result<()> {
+	run_with_input(day, project_root, false, release)
 }
 
-fn run_with_input(day: u32, project_root: &Path, input_file: File, release: bool) -> Result<()> {
+fn run_with_input(day: u32, project_root: &Path, real: bool, release: bool) -> Result<()> {
+	eprintln!(
+		"Running day {day} in {} with {} input",
+		if release { "release" } else { "debug" },
+		if real { "real" } else { "test" }
+	);
+	let input_file = File::open(project_root.join(format!(
+		"inputs/{}{day:02}.txt",
+		if real { "day" } else { "test" }
+	)))?;
 	cargo_in(
 		["run", "--package", &format!("day{day:02}")]
 			.into_iter()
