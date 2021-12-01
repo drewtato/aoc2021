@@ -1,4 +1,4 @@
-use helpers::read_stdin;
+use helpers::{display, read_stdin};
 
 type Input = Vec<u32>;
 
@@ -16,9 +16,9 @@ fn main() {
 
 	// Part 1
 	let counter = inp.windows(2).filter(|&i| i[0] < i[1]).count();
-	println!("{}", counter);
+	display(counter);
 
 	// Part 2
 	let counter = inp.windows(4).filter(|&i| i[0] < i[3]).count();
-	println!("{}", counter);
+	display(counter);
 }
