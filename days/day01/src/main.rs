@@ -12,5 +12,13 @@ fn parser() -> Input {
 }
 
 fn main() {
-	println!("{:?}", parser());
+	let inp = parser();
+
+	// Part 1
+	let counter = inp.windows(2).filter(|&i| i[0] < i[1]).count();
+	println!("{}", counter);
+
+	// Part 2
+	let counter = inp.windows(4).filter(|&i| i[0] < i[3]).count();
+	println!("{}", counter);
 }
