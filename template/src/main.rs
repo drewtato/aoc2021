@@ -1,4 +1,4 @@
-use helpers::read_stdin;
+use helpers::{display, read_stdin};
 
 type Input = Vec<u32>;
 
@@ -12,5 +12,6 @@ fn parser() -> Input {
 }
 
 fn main() {
-	println!("{:?}", parser());
+	let inp = parser();
+	debug(inp);
 }
