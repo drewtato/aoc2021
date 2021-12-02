@@ -7,5 +7,3 @@ edition = "2021"
 
 [dependencies]
 helpers = {	path = "../../helpers" }
-itertools = "0.10.1"
-regex = "1.5.4"
