@@ -1,6 +1,6 @@
 use helpers::{debug, read_stdin};
 
-type Input = Vec<u32>;
+type Input = Vec<i32>;
 
 fn parser() -> Input {
 	read_stdin()
