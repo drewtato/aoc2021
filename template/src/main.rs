@@ -1,4 +1,4 @@
-use helpers::{display, read_stdin};
+use helpers::{debug, read_stdin};
 
 type Input = Vec<u32>;
 
