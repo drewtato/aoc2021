@@ -1,6 +1,6 @@
 use std::ops::Deref;
 
-use helpers::{display, read_stdin};
+use helpers::{display, read_stdin, ArrayFrom};
 
 type Input = Vec<(String, i32)>;
 
@@ -10,10 +10,8 @@ fn parser() -> Input {
 		.trim()
 		.lines()
 		.map(|l| {
-			let items: Vec<_> = l.split_ascii_whitespace().collect();
-			let first = items[0].to_string();
-			let num: i32 = items[1].parse().unwrap();
-			(first, num)
+			let [first, num] = l.split_ascii_whitespace().array_from().unwrap();
+			(first.to_string(), num.parse().unwrap())
 		})
 		.collect()
 }
