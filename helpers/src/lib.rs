@@ -7,7 +7,6 @@ use std::{
 };
 
 pub use itertools;
-pub use reformation;
 pub use regex;
 
 pub type BoxErr = Box<dyn std::error::Error>;
@@ -27,80 +26,79 @@ pub fn debug<T: Debug>(value: T) {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum ArrayFromError {
-	NotEnoughItems,
-	TooManyItems,
-	OtherError(&'static str),
-}
-
-impl std::error::Error for ArrayFromError {}
-
-impl Display for ArrayFromError {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		f.write_str(match self {
-			ArrayFromError::NotEnoughItems => "Not enough items",
-			ArrayFromError::TooManyItems => "Too many items",
-			ArrayFromError::OtherError(s) => s,
-		})
-	}
-}
-
-pub trait ArrayFrom {
-	type Item;
-	fn array_from<const N: usize>(self) -> Result<[Self::Item; N], ArrayFromError>
-	where
-		Self: Sized;
-}
-
-impl<T: Iterator> ArrayFrom for T {
-	type Item = <Self as Iterator>::Item;
-	fn array_from<const N: usize>(mut self) -> Result<[Self::Item; N], ArrayFromError>
-	where
-		Self: Sized,
-	{
-		let arr = std::array::try_from_fn(|_| self.next().ok_or(ArrayFromError::NotEnoughItems))?;
-
-		if self.next().is_some() {
-			return Err(ArrayFromError::TooManyItems);
-		}
-
-		Ok(arr)
-	}
-}
-
-#[derive(Debug)]
-pub enum TupleParseError {
+pub enum MultiParseError {
 	NotEnoughItems,
 	TooManyItems,
 	ParseError,
 }
 
-impl std::error::Error for TupleParseError {}
+impl std::error::Error for MultiParseError {}
 
-impl Display for TupleParseError {
+impl Display for MultiParseError {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		f.write_str(match self {
-			TupleParseError::NotEnoughItems => "Not enough items in tuple parse",
-			TupleParseError::TooManyItems => "Too many items in tuple parse",
-			TupleParseError::ParseError => "Parse error in tuple parse",
+			MultiParseError::NotEnoughItems => "Not enough items in multiparse",
+			MultiParseError::TooManyItems => "Too many items in multiparse",
+			MultiParseError::ParseError => "Parse error in multiparse",
 		})
 	}
 }
 
+pub trait ArrayParse {
+	fn array_parse<I: FromStr, const N: usize>(self) -> Result<[I; N], MultiParseError>
+	where
+		Self: Sized;
+}
+
+impl<'a, T: Iterator<Item = &'a str>> ArrayParse for T {
+	fn array_parse<I: FromStr, const N: usize>(mut self) -> Result<[I; N], MultiParseError>
+	where
+		Self: Sized,
+	{
+		let arr = std::array::try_from_fn(|_| {
+			self.next()
+				.ok_or(MultiParseError::NotEnoughItems)
+				.and_then(|s| s.parse().map_err(|_| MultiParseError::ParseError))
+		})?;
+
+		if self.next().is_some() {
+			return Err(MultiParseError::TooManyItems);
+		}
+
+		Ok(arr)
+	}
+}
+pub trait VecParse {
+	fn vec_parse<I: FromStr>(self) -> Result<Vec<I>, MultiParseError>
+	where
+		Self: Sized;
+}
+
+impl<'a, T: Iterator<Item = &'a str>> VecParse for T {
+	fn vec_parse<I: FromStr>(self) -> Result<Vec<I>, MultiParseError>
+	where
+		Self: Sized,
+	{
+		self.map(FromStr::from_str)
+			.collect::<Result<_, _>>()
+			.map_err(|_| MultiParseError::ParseError)
+	}
+}
+
 pub trait TupleFromStr {
-	fn tuple_from_str<'a, I: Iterator<Item = &'a str>>(iter: I) -> Result<Self, TupleParseError>
+	fn tuple_from_str<'a, I: Iterator<Item = &'a str>>(iter: I) -> Result<Self, MultiParseError>
 	where
 		Self: std::marker::Sized;
 }
 
 pub trait TupleParse {
-	fn tuple_parse<T>(self) -> Result<T, TupleParseError>
+	fn tuple_parse<T>(self) -> Result<T, MultiParseError>
 	where
 		T: TupleFromStr;
 }
 
 impl<'a, I: Iterator<Item = &'a str>> TupleParse for I {
-	fn tuple_parse<T>(self) -> Result<T, TupleParseError>
+	fn tuple_parse<T>(self) -> Result<T, MultiParseError>
 	where
 		T: TupleFromStr,
 	{
@@ -113,17 +111,17 @@ macro_rules! tuple_from_str_impl {
 impl<$($i: FromStr,)*> TupleFromStr for ($($i,)*) {
 	fn tuple_from_str<'a, It: Iterator<Item = &'a str>>(
 		mut iter: It,
-	) -> Result<Self, TupleParseError> {
+	) -> Result<Self, MultiParseError> {
 		let tup = ($(
 			iter.next()
-				.ok_or(TupleParseError::NotEnoughItems)?
+				.ok_or(MultiParseError::NotEnoughItems)?
 				// This turbofish is unnecessary for the generated code, but $i needs to be in here
 				// somewhere so the macro knows what to repeat.
 				.parse::<$i>()
-				.map_err(|_| TupleParseError::ParseError)?,
+				.map_err(|_| MultiParseError::ParseError)?,
 		)*);
 		if iter.next().is_some() {
-			return Err(TupleParseError::TooManyItems);
+			return Err(MultiParseError::TooManyItems);
 		}
 		Ok(tup)
 	}
@@ -147,14 +145,14 @@ tuple_from_str_impl!(A, B, C, D, E, F, G, H, I, J, K, L,);
 // impl<A: FromStr> TupleFromStr for (A,) {
 // 	fn tuple_from_str<'a, I: Iterator<Item = &'a str>>(
 // 		mut iter: I,
-// 	) -> Result<Self, TupleParseError> {
+// 	) -> Result<Self, MultiParseError> {
 // 		let tup = (iter
 // 			.next()
-// 			.ok_or(TupleParseError::NotEnoughItems)?
+// 			.ok_or(MultiParseError::NotEnoughItems)?
 // 			.parse()
-// 			.map_err(|_| TupleParseError::ParseError)?,);
+// 			.map_err(|_| MultiParseError::ParseError)?,);
 // 		if iter.next().is_some() {
-// 			return Err(TupleParseError::TooManyItems);
+// 			return Err(MultiParseError::TooManyItems);
 // 		}
 // 		Ok(tup)
 // 	}
@@ -163,19 +161,19 @@ tuple_from_str_impl!(A, B, C, D, E, F, G, H, I, J, K, L,);
 // impl<A: FromStr, B: FromStr> TupleFromStr for (A, B) {
 // 	fn tuple_from_str<'a, I: Iterator<Item = &'a str>>(
 // 		mut iter: I,
-// 	) -> Result<Self, TupleParseError> {
+// 	) -> Result<Self, MultiParseError> {
 // 		let tup = (
 // 			iter.next()
-// 				.ok_or(TupleParseError::NotEnoughItems)?
+// 				.ok_or(MultiParseError::NotEnoughItems)?
 // 				.parse()
-// 				.map_err(|_| TupleParseError::ParseError)?,
+// 				.map_err(|_| MultiParseError::ParseError)?,
 // 			iter.next()
-// 				.ok_or(TupleParseError::NotEnoughItems)?
+// 				.ok_or(MultiParseError::NotEnoughItems)?
 // 				.parse()
-// 				.map_err(|_| TupleParseError::ParseError)?,
+// 				.map_err(|_| MultiParseError::ParseError)?,
 // 		);
 // 		if iter.next().is_some() {
-// 			return Err(TupleParseError::TooManyItems);
+// 			return Err(MultiParseError::TooManyItems);
 // 		}
 // 		Ok(tup)
 // 	}
