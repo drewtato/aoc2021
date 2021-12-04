@@ -1,4 +1,4 @@
-use helpers::{display, read_stdin, VecParse};
+use helpers::{display, read_stdin, MultiParse};
 
 type Input = Vec<Vec<usize>>;
 
@@ -7,7 +7,7 @@ fn parser() -> Input {
 		.unwrap()
 		.trim()
 		.lines()
-		.map(|l| l.split_inclusive(|_| true).vec_parse().unwrap())
+		.map(|l| l.split_inclusive(|_| true).multi_parse().unwrap())
 		.collect()
 }
 

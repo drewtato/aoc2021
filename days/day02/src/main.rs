@@ -1,6 +1,6 @@
 use std::ops::Deref;
 
-use helpers::{display, read_stdin, TupleParse};
+use helpers::{display, read_stdin, MultiParse};
 
 type Input = Vec<(String, i32)>;
 
@@ -9,7 +9,7 @@ fn parser() -> Input {
 		.unwrap()
 		.trim()
 		.lines()
-		.map(|l| l.split_ascii_whitespace().tuple_parse().unwrap())
+		.map(|l| l.split_ascii_whitespace().multi_parse().unwrap())
 		.collect()
 }
 
