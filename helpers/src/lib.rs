@@ -74,7 +74,7 @@ where
 	new_map
 }
 
-pub fn display_2d_map<V>(map: &HashMap<(usize, usize), V>, default: &str)
+pub fn display_2d_map<V>(map: &HashMap<(isize, isize), V>, default: &str)
 where
 	V: Display,
 {
