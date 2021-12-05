@@ -1,3 +1,4 @@
+#![allow(unused_imports)]
 use helpers::{debug, read_stdin};
 
 type Input = Vec<i32>;

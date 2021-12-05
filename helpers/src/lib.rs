@@ -4,12 +4,14 @@
 use std::{
 	cmp::Eq,
 	collections::HashMap,
-	fmt::{Debug, Display},
+	fmt::{Debug, Display, Write},
 	hash::Hash,
-	io::{stdin, stdout, BufRead, Read, Write},
+	io::{stdin, stdout, BufRead, Read, Write as IoWrite},
+	iter,
 };
 
 pub use itertools;
+use itertools::Itertools;
 pub use regex;
 
 pub type BoxErr = Box<dyn std::error::Error>;
@@ -70,6 +72,46 @@ where
 		}
 	}
 	new_map
+}
+
+pub fn display_2d_map<V>(map: &HashMap<(usize, usize), V>, default: &str)
+where
+	V: Display,
+{
+	let (xmin, xmax) = map.keys().map(|&(x, _)| x).minmax().into_option().unwrap();
+	let (ymin, ymax) = map.keys().map(|&(_, y)| y).minmax().into_option().unwrap();
+	let mut screen = String::new();
+	for y in ymin..=ymax {
+		for x in xmin..=xmax {
+			map.get(&(x, y))
+				.map(|v| {
+					write!(screen, "{}", v).unwrap();
+				})
+				.unwrap_or_else(|| screen.push_str(default));
+		}
+		screen.push('\n');
+	}
+	display(screen);
+}
+
+pub fn range_reversible(mut start: isize, end: isize) -> impl Iterator<Item = isize> {
+	let increment = if start < end { 1 } else { -1 };
+	iter::from_fn(move || {
+		if start == end {
+			return None;
+		}
+		let v = start;
+		start += increment;
+		Some(v)
+	})
+}
+
+pub fn range_reversible_inclusive(start: isize, end: isize) -> impl Iterator<Item = isize> {
+	if start < end {
+		range_reversible(start, end + 1)
+	} else {
+		range_reversible(start, end - 1)
+	}
 }
 
 mod multi_parse;
