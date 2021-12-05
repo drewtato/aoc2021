@@ -5,11 +5,13 @@ use std::{
 	cmp::Eq,
 	collections::HashMap,
 	fmt::{Debug, Display, Write},
+	fs::create_dir_all,
 	hash::Hash,
 	io::{stdin, stdout, BufRead, Read, Write as IoWrite},
 	iter,
 };
 
+use image::GrayImage;
 pub use itertools;
 use itertools::Itertools;
 pub use regex;
@@ -74,24 +76,86 @@ where
 	new_map
 }
 
+pub fn display_2d_vec<V>(grid: &[Vec<V>])
+where
+	V: Display,
+{
+	let width =
+		grid.iter()
+			.flatten()
+			.map(|v| v.to_string().len())
+			.max()
+			.unwrap() + 1;
+	let mut screen = String::new();
+	for y in grid {
+		for v in y {
+			write!(screen, "{:>width$}", v).unwrap();
+		}
+		screen.push('\n');
+	}
+	display(screen);
+}
+
+pub fn image_2d_vec(grid: &[Vec<usize>], name: &str) {
+	let (vmin, vmax) = grid
+		.iter()
+		.flatten()
+		.copied()
+		.minmax()
+		.into_option()
+		.unwrap();
+	let mut img = GrayImage::new(grid[0].len() as u32, grid.len() as u32);
+	for (grid_row, img_row) in grid.iter().zip(img.rows_mut()) {
+		for (&v, pixel) in grid_row.iter().zip(img_row) {
+			let color = (v - vmin) * 255 / vmax;
+			pixel.0 = [color as u8];
+		}
+	}
+	create_dir_all("visualizations").unwrap();
+	img.save(format!("visualizations/{name}.png")).unwrap();
+}
+
 pub fn display_2d_map<V>(map: &HashMap<(isize, isize), V>, default: &str)
 where
 	V: Display,
 {
 	let (xmin, xmax) = map.keys().map(|&(x, _)| x).minmax().into_option().unwrap();
 	let (ymin, ymax) = map.keys().map(|&(_, y)| y).minmax().into_option().unwrap();
+	let width = map.values().map(|v| v.to_string().len()).max().unwrap() + 1;
 	let mut screen = String::new();
 	for y in ymin..=ymax {
 		for x in xmin..=xmax {
-			map.get(&(x, y))
-				.map(|v| {
-					write!(screen, "{}", v).unwrap();
-				})
-				.unwrap_or_else(|| screen.push_str(default));
+			if let Some(v) = map.get(&(x, y)) {
+				write!(screen, "{:>width$}", v).unwrap();
+			} else {
+				write!(screen, "{:>width$}", default).unwrap();
+			}
 		}
 		screen.push('\n');
 	}
 	display(screen);
+}
+
+pub fn image_2d_map(map: &HashMap<(isize, isize), isize>, background: isize, name: &str) {
+	let (xmin, xmax) = map.keys().map(|&(x, _)| x).minmax().into_option().unwrap();
+	let (ymin, ymax) = map.keys().map(|&(_, y)| y).minmax().into_option().unwrap();
+	let (vmin, vmax) = map
+		.values()
+		.copied()
+		.chain(Some(background))
+		.minmax()
+		.into_option()
+		.unwrap();
+	let mut img = GrayImage::new((xmax - xmin + 1) as u32, (ymax - ymin + 1) as u32);
+	for (y, row) in (ymin..=ymax).zip(img.rows_mut()) {
+		for (x, pixel) in (xmin..=xmax).zip(row) {
+			let map_value = map.get(&(x, y)).copied().unwrap_or(background);
+			let color = (map_value - vmin) * 255 / vmax;
+			pixel.0 = [color as u8];
+		}
+	}
+	create_dir_all("visualizations").unwrap();
+	img.save(format!("visualizations/{name}.png")).unwrap();
 }
 
 pub fn range_reversible(mut start: isize, end: isize) -> impl Iterator<Item = isize> {

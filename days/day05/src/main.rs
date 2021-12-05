@@ -1,6 +1,7 @@
+#![allow(unused_imports)]
 use std::collections::HashMap;
 
-use helpers::{display, range_reversible_inclusive, read_stdin, MultiParse};
+use helpers::*;
 
 type Input = Vec<Line>;
 
@@ -59,6 +60,7 @@ fn main() {
 			}
 		}
 	}
+	// image_2d_map(&map, 0, "day05");
 	// display_2d_map(&map, ".");
 	display(map.values().filter(|&&v| v >= 2).count());
 }
