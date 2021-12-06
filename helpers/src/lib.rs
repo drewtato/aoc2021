@@ -4,9 +4,9 @@
 use std::{
 	cmp::Eq,
 	collections::HashMap,
-	fmt::{Debug, Display},
+	fmt::{Debug, Display, Write as FmtWrite},
 	hash::Hash,
-	io::{stdin, stdout, BufRead, Read, Write},
+	io::{stdin, stdout, BufRead, Write as IoWrite},
 	iter,
 };
 
@@ -18,7 +18,9 @@ pub type BoxErr = Box<dyn std::error::Error>;
 
 pub fn read_stdin() -> Result<String, BoxErr> {
 	let mut buf = String::new();
-	stdin().lock().read_to_string(&mut buf)?;
+	for line in stdin().lock().lines() {
+		writeln!(buf, "{}", line?).unwrap();
+	}
 	Ok(buf)
 }
 
@@ -95,10 +97,10 @@ pub fn range_reversible_inclusive(start: isize, end: isize) -> impl Iterator<Ite
 }
 
 mod visual;
-pub use visual::{display_2d_map, display_2d_vec, image_2d_map, image_2d_vec};
+pub use visual::*;
 
 mod multi_parse;
-pub use multi_parse::{MultiFromStr, MultiParse, MultiParseError};
+pub use multi_parse::*;
 
 // mod bi_map;
 // pub use bi_map::BiMap;

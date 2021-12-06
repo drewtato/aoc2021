@@ -1,33 +1,30 @@
 use std::collections::HashMap;
+// use std::time::Instant;
 
 use helpers::{display, itertools::Itertools, read_stdin, MultiParse};
 
-type Number = u8;
+type Number = u16;
 type Input = (Vec<Number>, Vec<Vec<Vec<Number>>>);
 
 struct Board {
 	won: bool,
 	positions: HashMap<Number, (usize, usize)>,
-	rows: Vec<u8>,
-	cols: Vec<u8>,
+	rows: Vec<usize>,
+	cols: Vec<usize>,
 }
 
 impl Board {
 	fn new(board: Vec<Vec<Number>>) -> Self {
+		let size = board[0].len();
 		Board {
 			won: false,
 			positions: board
-				.iter()
+				.into_iter()
 				.enumerate()
-				.flat_map(|(y, row)| {
-					row.iter()
-						.copied()
-						.enumerate()
-						.map(move |(x, n)| (n, (y, x)))
-				})
+				.flat_map(|(y, row)| row.into_iter().enumerate().map(move |(x, n)| (n, (y, x))))
 				.collect::<HashMap<Number, (usize, usize)>>(),
-			rows: vec![0; 5],
-			cols: vec![0; 5],
+			rows: vec![0; size],
+			cols: vec![0; size],
 		}
 	}
 }
@@ -59,6 +56,8 @@ fn parser() -> Input {
 
 fn main() {
 	let (order, boards) = parser();
+	let size = boards[0][0].len();
+	// let start = Instant::now();
 	let mut boards = boards.into_iter().map(Board::new).collect_vec();
 
 	// Part 1 and 2
@@ -75,12 +74,13 @@ fn main() {
 			if let Some((y, x)) = positions.remove(&n) {
 				rows[y] += 1;
 				cols[x] += 1;
-				if cols[x] == 5 || rows[y] == 5 {
+				if cols[x] == size || rows[y] == size {
 					*won = true;
 					if last_win.is_some() {
 						last_win = Some(score(positions, n))
 					} else {
 						let new_score = score(positions, n);
+						// display(start.elapsed().as_secs_f32());
 						display(new_score);
 						last_win = Some(new_score);
 					}
@@ -89,6 +89,7 @@ fn main() {
 		}
 		boards.retain(|board| !board.won);
 	}
+	// display(start.elapsed().as_secs_f32());
 	display(last_win.unwrap());
 }
 
