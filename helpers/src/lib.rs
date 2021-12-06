@@ -102,3 +102,6 @@ pub use multi_parse::{MultiFromStr, MultiParse, MultiParseError};
 
 // mod bi_map;
 // pub use bi_map::BiMap;
+
+mod re;
+pub use re::*;
