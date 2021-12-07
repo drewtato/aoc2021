@@ -1,10 +1,10 @@
 #![allow(unused_imports)]
-use helpers::{self::*, regex::Regex};
+use helpers::*;
 
 type Input = Vec<Vec<i32>>;
 
 fn parser() -> Input {
-	let re = Regex::new(r"(\d+)").unwrap();
+	let re = regex::Regex::new(r"(\d+)").unwrap();
 	read_stdin()
 		.unwrap()
 		.trim()

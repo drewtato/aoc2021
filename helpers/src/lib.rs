@@ -113,3 +113,6 @@ pub use re::*;
 
 mod signed_vec;
 pub use signed_vec::*;
+
+mod default_map;
+pub use default_map::*;
