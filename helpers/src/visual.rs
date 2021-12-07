@@ -11,6 +11,13 @@ pub fn display_2d_vec<V>(grid: &[Vec<V>])
 where
 	V: Display,
 {
+	display(string_2d_vec(grid));
+}
+
+pub fn string_2d_vec<V>(grid: &[Vec<V>]) -> String
+where
+	V: Display,
+{
 	let width =
 		grid.iter()
 			.flatten()
@@ -24,7 +31,7 @@ where
 		}
 		screen.push('\n');
 	}
-	display(screen);
+	screen
 }
 
 pub fn image_2d_vec(grid: &[Vec<usize>], name: &str) {
@@ -46,17 +53,24 @@ pub fn image_2d_vec(grid: &[Vec<usize>], name: &str) {
 	img.save(format!("visualizations/{name}.png")).unwrap();
 }
 
-pub fn display_2d_map<V>(map: &HashMap<(isize, isize), V>, default: &str)
+pub fn display_2d_map<V>(map: &HashMap<[isize; 2], V>, default: &str)
 where
 	V: Display,
 {
-	let (xmin, xmax) = map.keys().map(|&(x, _)| x).minmax().into_option().unwrap();
-	let (ymin, ymax) = map.keys().map(|&(_, y)| y).minmax().into_option().unwrap();
+	display(string_2d_map(map, default));
+}
+
+pub fn string_2d_map<V>(map: &HashMap<[isize; 2], V>, default: &str) -> String
+where
+	V: Display,
+{
+	let (xmin, xmax) = map.keys().map(|&[x, _]| x).minmax().into_option().unwrap();
+	let (ymin, ymax) = map.keys().map(|&[_, y]| y).minmax().into_option().unwrap();
 	let width = map.values().map(|v| v.to_string().len()).max().unwrap() + 1;
 	let mut screen = String::new();
 	for y in ymin..=ymax {
 		for x in xmin..=xmax {
-			if let Some(v) = map.get(&(x, y)) {
+			if let Some(v) = map.get(&[x, y]) {
 				write!(screen, "{:>width$}", v).unwrap();
 			} else {
 				write!(screen, "{:>width$}", default).unwrap();
@@ -64,12 +78,12 @@ where
 		}
 		screen.push('\n');
 	}
-	display(screen);
+	screen
 }
 
-pub fn image_2d_map(map: &HashMap<(isize, isize), isize>, background: isize, name: &str) {
-	let (xmin, xmax) = map.keys().map(|&(x, _)| x).minmax().into_option().unwrap();
-	let (ymin, ymax) = map.keys().map(|&(_, y)| y).minmax().into_option().unwrap();
+pub fn image_2d_map(map: &HashMap<[isize; 2], isize>, background: isize, name: &str) {
+	let (xmin, xmax) = map.keys().map(|&[x, _]| x).minmax().into_option().unwrap();
+	let (ymin, ymax) = map.keys().map(|&[_, y]| y).minmax().into_option().unwrap();
 	let (vmin, vmax) = map
 		.values()
 		.copied()
@@ -80,7 +94,7 @@ pub fn image_2d_map(map: &HashMap<(isize, isize), isize>, background: isize, nam
 	let mut img = GrayImage::new((xmax - xmin + 1) as u32, (ymax - ymin + 1) as u32);
 	for (y, row) in (ymin..=ymax).zip(img.rows_mut()) {
 		for (x, pixel) in (xmin..=xmax).zip(row) {
-			let map_value = map.get(&(x, y)).copied().unwrap_or(background);
+			let map_value = map.get(&[x, y]).copied().unwrap_or(background);
 			let color = (map_value - vmin) * 255 / vmax;
 			pixel.0 = [color as u8];
 		}
