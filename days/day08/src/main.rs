@@ -46,7 +46,7 @@ fn main() {
 	// Part 2 (whew)
 	// let segment_counts_reverse =
 	// 	reverse_multi_hash_map(&multi_hash_map(COUNTS.into_iter().enumerate()));
-	let map_reverse: HashMap<_, _> = MAP.into_iter().enumerate().map(|(a, b)| (b, a)).collect();
+	let map_reverse: HashMap<u8, usize> = index_map(&MAP);
 	// debug(segment_counts_reverse);
 	let total: usize = inp
 		.into_iter()

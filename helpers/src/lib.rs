@@ -105,6 +105,11 @@ where
 	map.iter().map(|(k, v)| (v.clone(), k.clone())).collect()
 }
 
+/// Takes a slice and outputs a `HashMap` of values to indexes.
+pub fn index_map<T: Eq + Hash + Clone>(s: &[T]) -> HashMap<T, usize> {
+	s.iter().enumerate().map(|(i, t)| (t.clone(), i)).collect()
+}
+
 mod visual;
 pub use visual::*;
 

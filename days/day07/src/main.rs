@@ -12,10 +12,9 @@ fn parser() -> Input {
 }
 
 fn main() {
-	let mut inp = parser();
+	let inp = parser().to_sorted_unstable();
 
 	// Part 1
-	inp.sort_unstable();
 	let middle = inp[inp.len() / 2];
 	let fuel: i32 = inp.iter().map(|&crab| (crab - middle).abs()).sum();
 	display(fuel);
