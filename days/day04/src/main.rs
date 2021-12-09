@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 // use std::time::Instant;
 
-use helpers::{display, itertools::Itertools, read_stdin, MultiParse};
+use helpers::{display, itertools::Itertools, read_stdin, CopyIter, MultiParse};
 
 type Number = u16;
 type Input = (Vec<Number>, Vec<Vec<Vec<Number>>>);
@@ -62,7 +62,7 @@ fn main() {
 
 	// Part 1 and 2
 	let mut last_win = None;
-	for n in order.iter().copied() {
+	for n in order.citer() {
 		for board in boards.iter_mut() {
 			let Board {
 				won,

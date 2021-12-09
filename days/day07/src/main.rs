@@ -21,8 +21,8 @@ fn main() {
 	display(fuel);
 
 	// Part 2
-	let max = inp.iter().copied().max().unwrap();
-	let mut fuel: i32 = inp.iter().copied().map(triangular).sum();
+	let max = inp.citer().max().unwrap();
+	let mut fuel: i32 = inp.citer().map(triangular).sum();
 	for middle in 1..=max {
 		let fuel_needed: i32 = inp
 			.iter()

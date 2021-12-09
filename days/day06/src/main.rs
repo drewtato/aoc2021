@@ -34,7 +34,7 @@ fn count_fishes(fishes: &mut [Number; 9], days: usize) {
 		fishes.copy_within(1..9, 0);
 		fishes[6] += new_fish;
 		fishes[8] = new_fish;
-		// display(fishes.iter().copied().sum::<Number>());
+		// display(fishes.citer().sum::<Number>());
 	}
-	display(fishes.iter().copied().sum::<Number>());
+	display(fishes.citer().sum::<Number>());
 }

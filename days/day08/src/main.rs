@@ -69,24 +69,21 @@ fn main() {
 				.iter()
 				.find(|&num| num.len() == 2)
 				.unwrap()
-				.iter()
-				.copied()
+				.citer()
 				.find(|&seg| seg != segments[5])
 				.unwrap();
 			segments[0] = all_nums
 				.iter()
 				.find(|&num| num.len() == 3)
 				.unwrap()
-				.iter()
-				.copied()
+				.citer()
 				.find(|&seg| seg != segments[2] && seg != segments[5])
 				.unwrap();
 			segments[3] = all_nums
 				.iter()
 				.find(|&num| num.len() == 4)
 				.unwrap()
-				.iter()
-				.copied()
+				.citer()
 				.find(|seg| !segments.contains(seg))
 				.unwrap();
 			segments[6] = (0..=6).find(|seg| !segments.contains(seg)).unwrap();

@@ -116,3 +116,6 @@ pub use signed_vec::*;
 
 mod default_map;
 pub use default_map::*;
+
+mod more_itertools;
+pub use more_itertools::*;
