@@ -1,4 +1,5 @@
 use std::{
+	cmp::Ordering,
 	collections::{
 		hash_map::{self, Keys, Values},
 		vec_deque, BinaryHeap, HashMap, VecDeque,
@@ -166,13 +167,13 @@ impl<T, C> Comparable<T, C> {
 	}
 }
 
-impl<T, C: Eq> Eq for Comparable<T, C> {}
-
 impl<T, C: PartialEq> PartialEq for Comparable<T, C> {
 	fn eq(&self, other: &Self) -> bool {
 		self.1 == other.1
 	}
 }
+
+impl<T, C: Eq> Eq for Comparable<T, C> {}
 
 impl<T, C: PartialOrd> PartialOrd for Comparable<T, C> {
 	fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
@@ -183,5 +184,151 @@ impl<T, C: PartialOrd> PartialOrd for Comparable<T, C> {
 impl<T, C: Ord> Ord for Comparable<T, C> {
 	fn cmp(&self, other: &Self) -> std::cmp::Ordering {
 		self.1.cmp(&other.1)
+	}
+}
+
+pub trait ToSorted {
+	type Item;
+	fn to_sorted(self) -> Self;
+	fn to_sorted_unstable(self) -> Self;
+	fn to_sorted_by<F>(self, f: F) -> Self
+	where
+		F: FnMut(&Self::Item, &Self::Item) -> Ordering;
+	fn to_sorted_unstable_by<F>(self, f: F) -> Self
+	where
+		F: FnMut(&Self::Item, &Self::Item) -> Ordering;
+	fn to_sorted_by_key<F, K>(self, f: F) -> Self
+	where
+		F: FnMut(&Self::Item) -> K,
+		K: Ord;
+	fn to_sorted_unstable_by_key<F, K>(self, f: F) -> Self
+	where
+		F: FnMut(&Self::Item) -> K,
+		K: Ord;
+}
+
+impl<T: Ord> ToSorted for Vec<T> {
+	type Item = T;
+	fn to_sorted(mut self) -> Self {
+		self.sort();
+		self
+	}
+	fn to_sorted_unstable(mut self) -> Self {
+		self.sort_unstable();
+		self
+	}
+	fn to_sorted_by<F>(mut self, f: F) -> Self
+	where
+		F: FnMut(&Self::Item, &Self::Item) -> Ordering,
+	{
+		self.sort_by(f);
+		self
+	}
+	fn to_sorted_unstable_by<F>(mut self, f: F) -> Self
+	where
+		F: FnMut(&Self::Item, &Self::Item) -> Ordering,
+	{
+		self.sort_unstable_by(f);
+		self
+	}
+	fn to_sorted_by_key<F, K>(mut self, f: F) -> Self
+	where
+		F: FnMut(&Self::Item) -> K,
+		K: Ord,
+	{
+		self.sort_by_key(f);
+		self
+	}
+	fn to_sorted_unstable_by_key<F, K>(mut self, f: F) -> Self
+	where
+		F: FnMut(&Self::Item) -> K,
+		K: Ord,
+	{
+		self.sort_unstable_by_key(f);
+		self
+	}
+}
+
+impl<T: Ord, const N: usize> ToSorted for [T; N] {
+	type Item = T;
+	fn to_sorted(mut self) -> Self {
+		self.sort();
+		self
+	}
+	fn to_sorted_unstable(mut self) -> Self {
+		self.sort_unstable();
+		self
+	}
+	fn to_sorted_by<F>(mut self, f: F) -> Self
+	where
+		F: FnMut(&Self::Item, &Self::Item) -> Ordering,
+	{
+		self.sort_by(f);
+		self
+	}
+	fn to_sorted_unstable_by<F>(mut self, f: F) -> Self
+	where
+		F: FnMut(&Self::Item, &Self::Item) -> Ordering,
+	{
+		self.sort_unstable_by(f);
+		self
+	}
+	fn to_sorted_by_key<F, K>(mut self, f: F) -> Self
+	where
+		F: FnMut(&Self::Item) -> K,
+		K: Ord,
+	{
+		self.sort_by_key(f);
+		self
+	}
+	fn to_sorted_unstable_by_key<F, K>(mut self, f: F) -> Self
+	where
+		F: FnMut(&Self::Item) -> K,
+		K: Ord,
+	{
+		self.sort_unstable_by_key(f);
+		self
+	}
+}
+
+impl<T: Ord> ToSorted for &mut [T] {
+	type Item = T;
+	fn to_sorted(self) -> Self {
+		self.sort();
+		self
+	}
+	fn to_sorted_unstable(self) -> Self {
+		self.sort_unstable();
+		self
+	}
+	fn to_sorted_by<F>(self, f: F) -> Self
+	where
+		F: FnMut(&Self::Item, &Self::Item) -> Ordering,
+	{
+		self.sort_by(f);
+		self
+	}
+	fn to_sorted_unstable_by<F>(self, f: F) -> Self
+	where
+		F: FnMut(&Self::Item, &Self::Item) -> Ordering,
+	{
+		self.sort_unstable_by(f);
+		self
+	}
+	fn to_sorted_by_key<F, K>(self, f: F) -> Self
+	where
+		F: FnMut(&Self::Item) -> K,
+		K: Ord,
+	{
+		self.sort_by_key(f);
+		self
+	}
+	fn to_sorted_unstable_by_key<F, K>(self, f: F) -> Self
+	where
+		F: FnMut(&Self::Item) -> K,
+		K: Ord,
+	{
+		self.sort_unstable_by_key(f);
+		self
 	}
 }

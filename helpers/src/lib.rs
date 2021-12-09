@@ -96,6 +96,15 @@ pub fn range_reversible_inclusive(start: isize, end: isize) -> impl Iterator<Ite
 	}
 }
 
+/// Reverses a `HashMap<K, V>` into a `HashMap<V, K>`, overwriting any duplicates.
+pub fn reverse_map_single<K, V>(map: &HashMap<K, V>) -> HashMap<V, K>
+where
+	K: Clone,
+	V: Clone + Eq + Hash,
+{
+	map.iter().map(|(k, v)| (v.clone(), k.clone())).collect()
+}
+
 mod visual;
 pub use visual::*;
 
