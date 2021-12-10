@@ -3,12 +3,14 @@ RUNNER
 Creates day's package, downloads input, and runs package with input.
 
 USAGE: `runner [day] [OPTIONS]`
+day: an integer between 1 and 25, or "all".
 If `day` is omitted, uses latest day.
 
 OPTIONS:
--h  Prints help.
--t  Runs with test input.
--r  Runs in release mode.
--s  Only runs setup (download input, setup package).
--i  Does not download input.
--y <year>  Downloads input from specified year. Good for testing downloading before December.
+-h        Prints help.
+-t        Runs with test input.
+-r        Runs in release mode.
+-s        Only runs setup (download input, setup package).
+-i        Does not download input.
+-y <year> Downloads input from specified year. Good for testing downloading before December.
+-e        Only executes (runs from target)

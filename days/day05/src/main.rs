@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 use std::collections::HashMap;
 
+use helpers::itertools::Itertools;
 use helpers::*;
 
 type Input = Vec<Line>;
@@ -22,47 +23,52 @@ fn parser() -> Input {
 
 fn main() {
 	let inp = parser();
+	let (xmin, xmax) = inp
+		.iter()
+		.flat_map(|line| [line.x1, line.x2])
+		.minmax()
+		.into_option()
+		.unwrap();
+	let (ymin, ymax) = inp
+		.iter()
+		.flat_map(|line| [line.y1, line.y2])
+		.minmax()
+		.into_option()
+		.unwrap();
 
 	// Part 1
-	let mut map: HashMap<[isize; 2], isize> = HashMap::new();
-	for &line in &inp {
+	let mut map: Vec<Vec<u8>> =
+		vec![vec![0; (ymax - ymin + 1) as usize]; (xmax - xmin + 1) as usize];
+	let mut diagonals = Vec::new();
+	for line in inp {
 		if line.y1 == line.y2 {
 			// println!("{:?} is vertical", (l.x1, l.y1, l.x2, l.y2));
 			for x in range_reversible_inclusive(line.x1, line.x2) {
-				*map.entry([x, line.y1]).or_default() += 1;
+				map[(x - xmin) as usize][(line.y1 - ymin) as usize] += 1;
 			}
 		} else if line.x1 == line.x2 {
 			// println!("{:?} is horizontal", (l.x1, l.y1, l.x2, l.y2));
 			for y in range_reversible_inclusive(line.y1, line.y2) {
-				*map.entry([line.x1, y]).or_default() += 1;
+				map[(line.x1 - xmin) as usize][(y - ymin) as usize] += 1;
 			}
+		} else {
+			diagonals.push(line);
 		}
 	}
 	// display_2d_map(&map, ".");
-	display(map.values().filter(|&&v| v >= 2).count());
+	display(map.iter().flatten().filter(|&&v| v >= 2).count());
 
 	// Part 2
-	let mut map: HashMap<[isize; 2], isize> = HashMap::new();
-	for line in inp {
-		if line.y1 == line.y2 {
-			for x in range_reversible_inclusive(line.x1, line.x2) {
-				*map.entry([x, line.y1]).or_default() += 1;
-			}
-		} else if line.x1 == line.x2 {
-			for y in range_reversible_inclusive(line.y1, line.y2) {
-				*map.entry([line.x1, y]).or_default() += 1;
-			}
-		} else {
-			for (x, y) in range_reversible_inclusive(line.x1, line.x2)
-				.zip(range_reversible_inclusive(line.y1, line.y2))
-			{
-				*map.entry([x, y]).or_default() += 1;
-			}
+	for line in diagonals {
+		for (x, y) in range_reversible_inclusive(line.x1, line.x2)
+			.zip(range_reversible_inclusive(line.y1, line.y2))
+		{
+			map[(x - xmin) as usize][(y - ymin) as usize] += 1;
 		}
 	}
 	// image_2d_map(&map, 0, "day05");
 	// display_2d_map(&map, ".");
-	display(map.values().filter(|&&v| v >= 2).count());
+	display(map.iter().flatten().filter(|&&v| v >= 2).count());
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
