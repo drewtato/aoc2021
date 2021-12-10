@@ -8,6 +8,7 @@ use std::{
 	hash::Hash,
 	io::{stdin, stdout, BufRead, Write as IoWrite},
 	iter,
+	str::FromStr,
 };
 
 pub use itertools;
@@ -24,13 +25,17 @@ pub fn read_stdin() -> Result<String, BoxErr> {
 	Ok(buf)
 }
 
-/// Prompts stdin for input and returns trimmed input.
-pub fn input() -> String {
+/// Prompts stdin for input and returns a parsed value.
+pub fn input<T>() -> T
+where
+	<T as FromStr>::Err: Debug,
+	T: FromStr,
+{
 	print!("> ");
 	stdout().flush().unwrap();
 	let mut buf = String::new();
 	stdin().lock().read_line(&mut buf).unwrap();
-	buf.trim().to_string()
+	buf.trim().parse().unwrap()
 }
 
 pub fn display<T: Display>(value: T) {

@@ -7,6 +7,7 @@ These are my solutions for Advent of Code 2021, this time in Rust.
 ```text
       -------Part 1--------   -------Part 2--------
 Day       Time  Rank  Score       Time  Rank  Score
+ 10   00:10:00  1549      0   00:16:10  1094      0
   9   00:11:27  2126      0   00:25:40  1348      0
   8   00:14:55  3964      0   02:10:07  6554      0
   7   00:09:33  4192      0   00:16:03  3932      0
