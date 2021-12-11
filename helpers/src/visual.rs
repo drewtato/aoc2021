@@ -42,6 +42,7 @@ pub fn image_2d_vec(grid: &[Vec<usize>], name: &str) {
 		.minmax()
 		.into_option()
 		.unwrap();
+	let vmax = vmax.max(1);
 	let mut img = GrayImage::new(grid[0].len() as u32, grid.len() as u32);
 	for (grid_row, img_row) in grid.iter().zip(img.rows_mut()) {
 		for (&v, pixel) in grid_row.iter().zip(img_row) {

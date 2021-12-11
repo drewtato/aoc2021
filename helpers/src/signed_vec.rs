@@ -17,8 +17,8 @@ use std::{
 pub struct SignedVec<T>(pub VecDeque<T>, pub isize);
 
 impl<T> SignedVec<T> {
-	pub fn new() -> Self {
-		Self(VecDeque::new(), 0)
+	pub fn new(start: isize) -> Self {
+		Self(VecDeque::new(), start)
 	}
 
 	pub fn from_vec_deque(vec_deque: VecDeque<T>) -> Self {
@@ -137,5 +137,17 @@ impl<T> DoubleEndedIterator for SignedVec<T> {
 impl<T> ExactSizeIterator for SignedVec<T> {
 	fn len(&self) -> usize {
 		self.0.len()
+	}
+}
+
+impl<T> From<VecDeque<T>> for SignedVec<T> {
+	fn from(vd: VecDeque<T>) -> Self {
+		SignedVec::from_vec_deque(vd)
+	}
+}
+
+impl<A> FromIterator<A> for SignedVec<A> {
+	fn from_iter<T: IntoIterator<Item = A>>(iter: T) -> Self {
+		SignedVec::from_vec_deque(iter.into_iter().collect())
 	}
 }

@@ -11,8 +11,8 @@ use std::{
 	str::FromStr,
 };
 
+pub use image;
 pub use itertools;
-
 pub use regex;
 
 pub type BoxErr = Box<dyn std::error::Error>;
@@ -38,12 +38,14 @@ where
 	buf.trim().parse().unwrap()
 }
 
+#[allow(clippy::print_with_newline)]
 pub fn display<T: Display>(value: T) {
-	println!("{}", value);
+	print!("{}\n", value);
 }
 
+#[allow(clippy::print_with_newline)]
 pub fn debug<T: Debug>(value: T) {
-	println!("{:?}", value);
+	print!("{:?}\n", value);
 }
 
 pub fn reverse_hash_map<K, V>(map: &HashMap<K, V>) -> HashMap<V, K>
@@ -127,8 +129,8 @@ pub use multi_parse::*;
 mod re;
 pub use re::*;
 
-// mod cellauto;
-// pub use cellauto::*;
+mod cellauto;
+pub use cellauto::*;
 
 mod signed_vec;
 pub use signed_vec::*;
