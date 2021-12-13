@@ -6,7 +6,7 @@ use std::{
 	collections::HashMap,
 	fmt::{Debug, Display, Write as FmtWrite},
 	hash::Hash,
-	io::{stdin, stdout, BufRead, Write as IoWrite},
+	io::{stdin, stdout, BufRead, Read, Write as IoWrite},
 	iter,
 	str::FromStr,
 };
@@ -20,8 +20,14 @@ pub type BoxErr = Box<dyn std::error::Error>;
 pub fn read_stdin() -> Result<String, BoxErr> {
 	let mut buf = String::new();
 	for line in stdin().lock().lines() {
-		writeln!(buf, "{}", line?).unwrap();
+		writeln!(buf, "{}", line?.trim()).unwrap();
 	}
+	Ok(buf)
+}
+
+pub fn read_stdin_fast() -> Result<String, BoxErr> {
+	let mut buf = String::new();
+	stdin().lock().read_to_string(&mut buf)?;
 	Ok(buf)
 }
 

@@ -1,6 +1,5 @@
 #![allow(unused_imports)]
 use std::collections::{HashMap, HashSet};
-use std::mem::size_of;
 
 use helpers::itertools::Itertools;
 use helpers::*;
@@ -17,69 +16,85 @@ fn parser() -> Input {
 		.collect()
 }
 
+type Key = i8;
+const START: Key = 0;
+const END: Key = 1;
+
 fn main() {
 	let inp = parser();
-	let map: HashMap<&str, Vec<&str>> =
+
+	let mut strings = HashMap::new();
+	strings.insert("start", START);
+	strings.insert("end", END);
+	let map: HashMap<Key, Vec<Key>> =
 		inp.iter()
 			.fold(HashMap::with_capacity(inp.len()), |mut map, (a, b)| {
-				if a != "start" && b != "end" {
-					map.entry(b.as_str()).or_default().push(a.as_str());
+				let next = strings.len() as Key;
+				let a = *strings.entry(a.as_str()).or_insert_with(|| {
+					if a.chars().next().unwrap().is_lowercase() {
+						-next
+					} else {
+						next
+					}
+				});
+				let next = strings.len() as Key;
+				let b = *strings.entry(b.as_str()).or_insert_with(|| {
+					if b.chars().next().unwrap().is_lowercase() {
+						-next
+					} else {
+						next
+					}
+				});
+				if a != START && b != END {
+					map.entry(b).or_default().push(a);
 				}
-				if b != "start" && a != "end" {
-					map.entry(a.as_str()).or_default().push(b.as_str());
+				if b != START && a != END {
+					map.entry(a).or_default().push(b);
 				}
 				map
 			});
 
-	// Part 1
-	let mut paths = vec![vec!["start"]];
-	let mut finished_paths = 0;
-	while let Some(path) = paths.pop() {
-		let new_paths = map[path.last().unwrap()].citer().flat_map(|next| {
-			if next.chars().next().unwrap().is_lowercase() && path.contains(&next) {
-				return None;
-			}
-			let mut new_path = path.clone();
-			new_path.push(next);
-			if next == "end" {
-				finished_paths += 1;
-				None
-			} else {
-				Some(new_path)
-			}
-		});
-		paths.extend(new_paths);
-	}
+	let finished_paths = num_paths::<false>(&map);
 	display(finished_paths);
 
-	// Part 2
-	let mut paths = vec![(vec!["start"], false)];
-	let mut finished_paths = 0;
-	// let mut max_size = 0;
-	while let Some((path, small)) = paths.pop() {
-		let new_paths = map[path.last().unwrap()].citer().flat_map(|next| {
-			let new_small = if next.chars().next().unwrap().is_lowercase() && path.contains(&next) {
-				if small {
-					return None;
-				} else {
-					true
-				}
-			} else {
-				small
-			};
-			let mut new_path = (path.clone(), new_small);
-			new_path.0.push(next);
-			if next == "end" {
-				finished_paths += 1;
-				None
-			} else {
-				Some(new_path)
-			}
-		});
-		paths.extend(new_paths);
-		// max_size = max_size.max(paths.iter().map(|path| path.0.len()).sum());
-	}
+	let finished_paths = num_paths::<true>(&map);
 	display(finished_paths);
-	// display(max_size);
-	// display(max_size * size_of::<&str>() + size_of::<bool>());
+}
+
+fn num_paths<const ALLOW_SMALL_TWICE: bool>(map: &HashMap<Key, Vec<Key>>) -> usize {
+	let mut path = vec![(START, 0u8)];
+	let mut visited = [0u8; 256];
+	let mut small_visited_twice = false;
+	let mut total = 0;
+
+	while let Some(&mut (node, ref mut index_mut)) = path.last_mut() {
+		let index = *index_mut;
+		*index_mut += 1;
+		if let Some(&next) = map[&node].get(index as usize) {
+			if next < 0 && visited[i8_to_usize(next)] > 0 {
+				if ALLOW_SMALL_TWICE && !small_visited_twice {
+					small_visited_twice = true;
+				} else {
+					continue;
+				}
+			} else if next == END {
+				total += 1;
+				continue;
+			}
+			path.push((next, 0));
+			visited[i8_to_usize(next)] += 1;
+		} else {
+			let (node, _) = path.pop().unwrap();
+			let vis = &mut visited[i8_to_usize(node)];
+			if ALLOW_SMALL_TWICE && node < 0 && *vis == 2 {
+				small_visited_twice = false;
+			}
+			*vis -= 1;
+		}
+	}
+	total
+}
+
+fn i8_to_usize(i: i8) -> usize {
+	((i as i16) + 128) as _
 }
