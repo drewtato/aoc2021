@@ -37,11 +37,15 @@ where
 	<T as FromStr>::Err: Debug,
 	T: FromStr,
 {
-	print!("> ");
-	stdout().flush().unwrap();
-	let mut buf = String::new();
-	stdin().lock().read_line(&mut buf).unwrap();
-	buf.trim().parse().unwrap()
+	loop {
+		print!("> ");
+		stdout().flush().unwrap();
+		let mut buf = String::new();
+		stdin().lock().read_line(&mut buf).unwrap();
+		if let Ok(t) = buf.trim().parse() {
+			break t;
+		}
+	}
 }
 
 #[allow(clippy::print_with_newline)]
