@@ -249,7 +249,6 @@ name = "day14"
 version = "0.1.0"
 dependencies = [
  "helpers",
- "rayon",
 ]
 
 [[package]]
