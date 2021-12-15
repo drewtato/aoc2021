@@ -8,6 +8,7 @@ use std::{
 	hash::Hash,
 	io::{stdin, stdout, BufRead, Read, Write as IoWrite},
 	iter,
+	num::Wrapping,
 	str::FromStr,
 };
 
@@ -46,6 +47,12 @@ where
 			break t;
 		}
 	}
+}
+
+/// Wraps the type in [`Wrapping`] to allow wrapping arithmetic by default. Use `.0` to access inner
+/// value.
+pub const fn w<T>(t: T) -> Wrapping<T> {
+	Wrapping(t)
 }
 
 #[allow(clippy::print_with_newline)]

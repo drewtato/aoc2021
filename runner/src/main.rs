@@ -29,8 +29,7 @@ fn main() -> Result<()> {
 		return Ok(());
 	}
 
-	let project_root =
-		project_root().ok_or_else::<BoxErr, _>(|| "Could not find project root".into())?;
+	let project_root = project_root().ok_or("Could not find project root")?;
 
 	let sub = args.subcommand()?;
 
@@ -46,9 +45,7 @@ fn main() -> Result<()> {
 
 	if let Some(s) = sub {
 		if &s == "all" {
-			for day in 1..=latest_day(&project_root)? {
-				runner_options.runner(day)?;
-			}
+			(1..=latest_day(&project_root)?).try_for_each(|day| runner_options.runner(day))
 		} else {
 			let day = s.parse().map_err(|_| {
 				eprintln!("{}", HELP);
@@ -56,18 +53,16 @@ fn main() -> Result<()> {
 			})?;
 
 			if day > 25 {
-				return Err(format!("Day can't be more than 25\nDay: {}", day).into());
+				return Err(format!("Day can't be greater than 25\nDay: {}", day).into());
 			}
 
-			runner_options.runner(day)?;
+			runner_options.runner(day)
 		}
 	} else {
 		let day = latest_day(&project_root)?;
 
-		runner_options.runner(day)?;
+		runner_options.runner(day)
 	}
-
-	Ok(())
 }
 
 #[derive(Debug, Clone, Copy)]
