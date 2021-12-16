@@ -1,12 +1,9 @@
 [package]
-name = "helpers"
+name = "day16"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-image = "0.23.14"
-itertools = "0.10.1"
-regex = "1.5.4"
-num-traits = "0.2.14"
+helpers = {	path = "../../helpers" }

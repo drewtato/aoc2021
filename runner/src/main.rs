@@ -44,19 +44,26 @@ fn main() -> Result<()> {
 	};
 
 	if let Some(s) = sub {
-		if &s == "all" {
-			(1..=latest_day(&project_root)?).try_for_each(|day| runner_options.runner(day))
-		} else {
-			let day = s.parse().map_err(|_| {
-				eprintln!("{}", HELP);
-				"Could not parse day as number"
-			})?;
-
-			if day > 25 {
-				return Err(format!("Day can't be greater than 25\nDay: {}", day).into());
+		match s.as_ref() {
+			"all" => {
+				(1..=latest_day(&project_root)?).try_for_each(|day| runner_options.runner(day))
 			}
+			"next" => {
+				let day = latest_day(&project_root)? + 1;
+				runner_options.runner(day)
+			}
+			_ => {
+				let day = s.parse().map_err(|_| {
+					eprintln!("{}", HELP);
+					"Could not parse day as number"
+				})?;
 
-			runner_options.runner(day)
+				if day > 25 {
+					return Err(format!("Day can't be greater than 25\nDay: {}", day).into());
+				}
+
+				runner_options.runner(day)
+			}
 		}
 	} else {
 		let day = latest_day(&project_root)?;

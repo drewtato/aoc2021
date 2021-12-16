@@ -55,6 +55,26 @@ pub const fn w<T>(t: T) -> Wrapping<T> {
 	Wrapping(t)
 }
 
+// pub fn side_neighbors<T, A2: AsRef<[A1]>, A1: AsRef<[T]>>(
+// 	slice_2d: &A2,
+// 	y: usize,
+// 	x: usize,
+// ) -> impl Iterator<Item = ([usize; 2], T)> + '_ {
+// 	let slice_ref = slice_2d.as_ref();
+// 	[
+// 		[usize::MAX, usize::MAX],
+// 		[usize::MAX, 1],
+// 		[1, usize::MAX],
+// 		[1, 1],
+// 	]
+// 	.into_iter()
+// 	.map(move |[dy, dx]| {
+// 		y = (w(y) + w(dy)).0;
+// 		x = (w(x) + w(dx)).0;
+// 		([y, x], slice_ref[y].as_ref()[x])
+// 	})
+// }
+
 #[allow(clippy::print_with_newline)]
 pub fn display<T: Display>(value: T) {
 	print!("{}\n", value);

@@ -36,29 +36,55 @@ fn main() {
 	let start = [0usize, 0];
 	let ymax = inp.len();
 	let xmax = inp[0].len();
-	let end = [ymax - 1, xmax - 1];
-	let solution = pathfinding::directed::astar::astar(
-		&start,
-		|&[y, x]| {
-			NEIGHBORS.into_iter().flat_map(move |[dy, dx]| {
-				let y = (w(y) - ONE + w(dy)).0;
-				let x = (w(x) - ONE + w(dx)).0;
-				inp_ref
-					.get(y)
-					.and_then(|row| row.get(x))
-					.copied()
-					.map(|cost| ([y, x], cost as usize))
-			})
-		},
-		|&[y, x]| end[0] - y + end[1] - x,
-		|&node| node == end,
-	)
-	.unwrap();
-	display(solution.1);
+	// let end = [ymax - 1, xmax - 1];
+	// let solution = pathfinding::directed::astar::astar(
+	// 	&start,
+	// 	|&[y, x]| {
+	// 		NEIGHBORS.into_iter().flat_map(move |[dy, dx]| {
+	// 			let y = (w(y) - ONE + w(dy)).0;
+	// 			let x = (w(x) - ONE + w(dx)).0;
+	// 			inp_ref
+	// 				.get(y)
+	// 				.and_then(|row| row.get(x))
+	// 				.copied()
+	// 				.map(|cost| ([y, x], cost as usize))
+	// 		})
+	// 	},
+	// 	|&[y, x]| end[0] - y + end[1] - x,
+	// 	|&node| node == end,
+	// )
+	// .unwrap();
+	// display(solution.1);
 
-	// Part 2
-	let end = [ymax * 5 - 1, xmax * 5 - 1];
-	let solution = pathfinding::directed::astar::astar(
+	// Part 2 with A*
+	// let end = [ymax * BOARD_DUP - 1, xmax * BOARD_DUP - 1];
+	// let solution = pathfinding::directed::astar::astar(
+	// 	&start,
+	// 	|&[y, x]| {
+	// 		NEIGHBORS.into_iter().flat_map(move |[dy, dx]| {
+	// 			let y = (w(y) - ONE + w(dy)).0;
+	// 			let (yboard, ysub) = (y / ymax, y % ymax);
+	// 			let x = (w(x) - ONE + w(dx)).0;
+	// 			let (xboard, xsub) = (x / xmax, x % xmax);
+	// 			if yboard >= BOARD_DUP || xboard >= BOARD_DUP {
+	// 				None
+	// 			} else {
+	// 				Some((
+	// 					[y, x],
+	// 					(inp_ref[ysub][xsub] as usize + yboard + xboard - 1) % 9 + 1,
+	// 				))
+	// 			}
+	// 		})
+	// 	},
+	// 	|&[y, x]| end[0] - y + end[1] - x,
+	// 	|&node| node == end,
+	// )
+	// .unwrap();
+	// display(solution.1);
+
+	// Part 2 wtih Dijkstra (faster)
+	let end = [ymax * BOARD_DUP - 1, xmax * BOARD_DUP - 1];
+	let solution = pathfinding::directed::dijkstra::dijkstra(
 		&start,
 		|&[y, x]| {
 			NEIGHBORS.into_iter().flat_map(move |[dy, dx]| {
@@ -66,23 +92,26 @@ fn main() {
 				let (yboard, ysub) = (y / ymax, y % ymax);
 				let x = (w(x) - ONE + w(dx)).0;
 				let (xboard, xsub) = (x / xmax, x % xmax);
-				if yboard >= 5 || xboard >= 5 {
+				if yboard >= BOARD_DUP || xboard >= BOARD_DUP {
 					None
 				} else {
-					inp_ref
-						.get(ysub)
-						.and_then(|row| row.get(xsub))
-						.copied()
-						.map(|cost| ([y, x], ((cost as usize + yboard + xboard - 1) % 9) + 1))
+					Some((
+						[y, x],
+						(inp_ref[ysub][xsub] as usize + yboard + xboard - 1) % 9 + 1,
+					))
 				}
 			})
 		},
-		|&[y, x]| end[0] - y + end[1] - x,
 		|&node| node == end,
 	)
 	.unwrap();
 	display(solution.1);
+
+	// for node in solution.0 {
+	// 	println!("{},{}", node[0] % ymax, node[1] % xmax);
+	// }
 }
 
 const NEIGHBORS: [[usize; 2]; 4] = [[0, 1], [2, 1], [1, 0], [1, 2]];
 const ONE: Wrapping<usize> = w(1);
+const BOARD_DUP: usize = 5;
