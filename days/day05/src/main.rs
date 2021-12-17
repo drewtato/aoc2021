@@ -44,12 +44,12 @@ fn main() {
 		if line.y1 == line.y2 {
 			// println!("{:?} is vertical", (l.x1, l.y1, l.x2, l.y2));
 			for x in range_reversible_inclusive(line.x1, line.x2) {
-				map[(x - xmin) as usize][(line.y1 - ymin) as usize] += 1;
+				*map.im(x - xmin).im(line.y1 - ymin) += 1;
 			}
 		} else if line.x1 == line.x2 {
 			// println!("{:?} is horizontal", (l.x1, l.y1, l.x2, l.y2));
 			for y in range_reversible_inclusive(line.y1, line.y2) {
-				map[(line.x1 - xmin) as usize][(y - ymin) as usize] += 1;
+				*map.im(line.x1 - xmin).im(y - ymin) += 1;
 			}
 		} else {
 			diagonals.push(line);

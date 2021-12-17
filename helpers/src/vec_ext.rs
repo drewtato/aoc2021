@@ -1,6 +1,7 @@
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::num::Wrapping;
+use std::ops::{Index, IndexMut};
 
 use num_traits::AsPrimitive;
 
@@ -23,6 +24,52 @@ where
 {
 	index.0.as_()
 }
+
+pub trait AsUsizeIndex<I>: Index<usize> {
+	fn i(&self, index: I) -> &Self::Output;
+}
+
+pub trait AsUsizeIndexMut<I>: IndexMut<usize> {
+	fn im(&mut self, index: I) -> &mut Self::Output;
+}
+
+macro_rules! impl_as_usize_index {
+	($($int_type:ty)*) => {
+		$(
+			impl<T> AsUsizeIndex<$int_type> for T
+			where T: Index<usize>
+			{
+				fn i(&self, index: $int_type) -> &Self::Output {
+					self.index(index as usize)
+				}
+			}
+			impl<T> AsUsizeIndexMut<$int_type> for T
+			where T: IndexMut<usize>
+			{
+				fn im(&mut self, index: $int_type) -> &mut Self::Output {
+					self.index_mut(index as usize)
+				}
+			}
+
+			impl<T> AsUsizeIndex<Wrapping<$int_type>> for T
+			where T: Index<usize>
+			{
+				fn i(&self, index: Wrapping<$int_type>) -> &Self::Output {
+					self.index(index.0 as usize)
+				}
+			}
+			impl<T> AsUsizeIndexMut<Wrapping<$int_type>> for T
+			where T: IndexMut<usize>
+			{
+				fn im(&mut self, index: Wrapping<$int_type>) -> &mut Self::Output {
+					self.index_mut(index.0 as usize)
+				}
+			}
+		)*
+	};
+}
+
+impl_as_usize_index! { u8 u16 u32 u64 u128 usize i8 i16 i32 i64 i128 isize }
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct ArrayMapIter<'a, V, A> {
@@ -103,7 +150,7 @@ impl<'a, T> Iterator for ArrayMapIter<'a, HashMap<[usize; 2], T>, &'static [[usi
 	}
 }
 
-const ALL_NEIGHBORS: [[usize; 2]; 8] = [
+pub const ALL_NEIGHBORS: [[usize; 2]; 8] = [
 	[usize::MAX, 0],
 	[usize::MAX, 1],
 	[0, 1],
@@ -114,7 +161,7 @@ const ALL_NEIGHBORS: [[usize; 2]; 8] = [
 	[usize::MAX, usize::MAX],
 ];
 
-const CORNER_NEIGHBORS: [[usize; 2]; 4] = [
+pub const CORNER_NEIGHBORS: [[usize; 2]; 4] = [
 	[usize::MAX, 1],
 	[1, 1],
 	[1, usize::MAX],
@@ -122,7 +169,7 @@ const CORNER_NEIGHBORS: [[usize; 2]; 4] = [
 ];
 
 #[rustfmt::skip]
-const SIDE_NEIGHBORS: [[usize; 2]; 4] = [
+pub const SIDE_NEIGHBORS: [[usize; 2]; 4] = [
 	[usize::MAX, 0],
 	[0, 1],
 	[1, 0],
