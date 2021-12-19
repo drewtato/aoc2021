@@ -1,7 +1,7 @@
 use std::{
 	collections::{
 		hash_map::{self, Keys, Values},
-		vec_deque, BinaryHeap, HashMap, VecDeque,
+		hash_set, vec_deque, BinaryHeap, HashMap, HashSet, VecDeque,
 	},
 	iter::Copied,
 	slice,
@@ -62,6 +62,18 @@ where
 
 	fn citer(&'a self) -> Self::CopyItem {
 		HashMapCopyIter(self.iter())
+	}
+}
+
+impl<'a, V> CopyIter<'a> for HashSet<V>
+where
+	V: Copy + 'a,
+	// F: FnMut((&K, &V)) -> (K, V),
+{
+	type CopyItem = Copied<hash_set::Iter<'a, V>>;
+
+	fn citer(&'a self) -> Self::CopyItem {
+		self.iter().copied()
 	}
 }
 

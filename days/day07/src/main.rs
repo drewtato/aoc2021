@@ -12,7 +12,7 @@ fn parser() -> Input {
 }
 
 fn main() {
-	let inp = parser().to_sorted_unstable();
+	let inp = parser().into_sorted_unstable();
 
 	// Part 1
 	let middle = inp[inp.len() / 2];

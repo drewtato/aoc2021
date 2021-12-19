@@ -230,51 +230,51 @@ impl<'a, T: 'a> NeighborIter<'a> for HashMap<[usize; 2], T> {
 	}
 }
 
-pub trait ToSorted {
+pub trait IntoSorted {
 	type Item;
-	fn to_sorted(self) -> Self;
-	fn to_sorted_unstable(self) -> Self;
-	fn to_sorted_by<F>(self, f: F) -> Self
+	fn into_sorted(self) -> Self;
+	fn into_sorted_unstable(self) -> Self;
+	fn into_sorted_by<F>(self, f: F) -> Self
 	where
 		F: FnMut(&Self::Item, &Self::Item) -> Ordering;
-	fn to_sorted_unstable_by<F>(self, f: F) -> Self
+	fn into_sorted_unstable_by<F>(self, f: F) -> Self
 	where
 		F: FnMut(&Self::Item, &Self::Item) -> Ordering;
-	fn to_sorted_by_key<F, K>(self, f: F) -> Self
+	fn into_sorted_by_key<F, K>(self, f: F) -> Self
 	where
 		F: FnMut(&Self::Item) -> K,
 		K: Ord;
-	fn to_sorted_unstable_by_key<F, K>(self, f: F) -> Self
+	fn into_sorted_unstable_by_key<F, K>(self, f: F) -> Self
 	where
 		F: FnMut(&Self::Item) -> K,
 		K: Ord;
 }
 
-impl<T: Ord> ToSorted for Vec<T> {
+impl<T: Ord> IntoSorted for Vec<T> {
 	type Item = T;
-	fn to_sorted(mut self) -> Self {
+	fn into_sorted(mut self) -> Self {
 		self.sort();
 		self
 	}
-	fn to_sorted_unstable(mut self) -> Self {
+	fn into_sorted_unstable(mut self) -> Self {
 		self.sort_unstable();
 		self
 	}
-	fn to_sorted_by<F>(mut self, f: F) -> Self
+	fn into_sorted_by<F>(mut self, f: F) -> Self
 	where
 		F: FnMut(&Self::Item, &Self::Item) -> Ordering,
 	{
 		self.sort_by(f);
 		self
 	}
-	fn to_sorted_unstable_by<F>(mut self, f: F) -> Self
+	fn into_sorted_unstable_by<F>(mut self, f: F) -> Self
 	where
 		F: FnMut(&Self::Item, &Self::Item) -> Ordering,
 	{
 		self.sort_unstable_by(f);
 		self
 	}
-	fn to_sorted_by_key<F, K>(mut self, f: F) -> Self
+	fn into_sorted_by_key<F, K>(mut self, f: F) -> Self
 	where
 		F: FnMut(&Self::Item) -> K,
 		K: Ord,
@@ -282,7 +282,7 @@ impl<T: Ord> ToSorted for Vec<T> {
 		self.sort_by_key(f);
 		self
 	}
-	fn to_sorted_unstable_by_key<F, K>(mut self, f: F) -> Self
+	fn into_sorted_unstable_by_key<F, K>(mut self, f: F) -> Self
 	where
 		F: FnMut(&Self::Item) -> K,
 		K: Ord,
@@ -292,31 +292,31 @@ impl<T: Ord> ToSorted for Vec<T> {
 	}
 }
 
-impl<T: Ord, const N: usize> ToSorted for [T; N] {
+impl<T: Ord, const N: usize> IntoSorted for [T; N] {
 	type Item = T;
-	fn to_sorted(mut self) -> Self {
+	fn into_sorted(mut self) -> Self {
 		self.sort();
 		self
 	}
-	fn to_sorted_unstable(mut self) -> Self {
+	fn into_sorted_unstable(mut self) -> Self {
 		self.sort_unstable();
 		self
 	}
-	fn to_sorted_by<F>(mut self, f: F) -> Self
+	fn into_sorted_by<F>(mut self, f: F) -> Self
 	where
 		F: FnMut(&Self::Item, &Self::Item) -> Ordering,
 	{
 		self.sort_by(f);
 		self
 	}
-	fn to_sorted_unstable_by<F>(mut self, f: F) -> Self
+	fn into_sorted_unstable_by<F>(mut self, f: F) -> Self
 	where
 		F: FnMut(&Self::Item, &Self::Item) -> Ordering,
 	{
 		self.sort_unstable_by(f);
 		self
 	}
-	fn to_sorted_by_key<F, K>(mut self, f: F) -> Self
+	fn into_sorted_by_key<F, K>(mut self, f: F) -> Self
 	where
 		F: FnMut(&Self::Item) -> K,
 		K: Ord,
@@ -324,7 +324,7 @@ impl<T: Ord, const N: usize> ToSorted for [T; N] {
 		self.sort_by_key(f);
 		self
 	}
-	fn to_sorted_unstable_by_key<F, K>(mut self, f: F) -> Self
+	fn into_sorted_unstable_by_key<F, K>(mut self, f: F) -> Self
 	where
 		F: FnMut(&Self::Item) -> K,
 		K: Ord,
@@ -334,31 +334,31 @@ impl<T: Ord, const N: usize> ToSorted for [T; N] {
 	}
 }
 
-impl<T: Ord> ToSorted for &mut [T] {
+impl<T: Ord> IntoSorted for &mut [T] {
 	type Item = T;
-	fn to_sorted(self) -> Self {
+	fn into_sorted(self) -> Self {
 		self.sort();
 		self
 	}
-	fn to_sorted_unstable(self) -> Self {
+	fn into_sorted_unstable(self) -> Self {
 		self.sort_unstable();
 		self
 	}
-	fn to_sorted_by<F>(self, f: F) -> Self
+	fn into_sorted_by<F>(self, f: F) -> Self
 	where
 		F: FnMut(&Self::Item, &Self::Item) -> Ordering,
 	{
 		self.sort_by(f);
 		self
 	}
-	fn to_sorted_unstable_by<F>(self, f: F) -> Self
+	fn into_sorted_unstable_by<F>(self, f: F) -> Self
 	where
 		F: FnMut(&Self::Item, &Self::Item) -> Ordering,
 	{
 		self.sort_unstable_by(f);
 		self
 	}
-	fn to_sorted_by_key<F, K>(self, f: F) -> Self
+	fn into_sorted_by_key<F, K>(self, f: F) -> Self
 	where
 		F: FnMut(&Self::Item) -> K,
 		K: Ord,
@@ -366,7 +366,7 @@ impl<T: Ord> ToSorted for &mut [T] {
 		self.sort_by_key(f);
 		self
 	}
-	fn to_sorted_unstable_by_key<F, K>(self, f: F) -> Self
+	fn into_sorted_unstable_by_key<F, K>(self, f: F) -> Self
 	where
 		F: FnMut(&Self::Item) -> K,
 		K: Ord,
