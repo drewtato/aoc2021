@@ -150,6 +150,18 @@ impl<'a, T> Iterator for ArrayMapIter<'a, HashMap<[usize; 2], T>, &'static [[usi
 	}
 }
 
+pub const REGION: [[usize; 2]; 9] = [
+	[usize::MAX, usize::MAX],
+	[usize::MAX, 0],
+	[usize::MAX, 1],
+	[0, usize::MAX],
+	[0, 0],
+	[0, 1],
+	[1, usize::MAX],
+	[1, 0],
+	[1, 1],
+];
+
 pub const ALL_NEIGHBORS: [[usize; 2]; 8] = [
 	[usize::MAX, 0],
 	[usize::MAX, 1],
@@ -218,7 +230,7 @@ impl<'a, T: 'a> NeighborIter<'a> for Vec<Vec<T>> {
 	}
 }
 
-impl<'a, T: 'a> NeighborIter<'a> for HashMap<[usize; 2], T> {
+impl<'a, T: 'a> NeighborIter<'a> for HashMap<[isize; 2], T> {
 	type Iter = ArrayMapIter<'a, Self, &'static [[usize; 2]]>;
 
 	fn array_neighbors<N, M>(&'a self, arr: &'static [[usize; 2]], y: N, x: M) -> Self::Iter
