@@ -1,7 +1,8 @@
 #![feature(array_from_fn)]
+#![feature(map_first_last)]
 #![allow(unused_imports)]
-use std::collections::HashMap;
-use std::ops::Add;
+use std::collections::{BTreeMap, HashMap};
+use std::ops::{Add, RangeInclusive};
 
 use helpers::itertools::Itertools;
 use helpers::*;
@@ -46,9 +47,12 @@ fn main() {
 
 	// Part 2
 	let [p1, p2] = [inp[0][1] - 1, inp[1][1] - 1];
-	let possibilities = (1..=3)
-		.flat_map(|n| (1..=3).map(move |m| m + n))
-		.flat_map(|n| (1..=3).map(move |m| m + n))
+
+	const QUANTUM_DIE: RangeInclusive<u8> = 1..=3;
+	let possibilities = [QUANTUM_DIE; 3]
+		.into_iter()
+		.multi_cartesian_product()
+		.map(|v| v.into_iter().sum())
 		.counts();
 	let possibilities = possibilities
 		.citer()
@@ -60,8 +64,8 @@ fn main() {
 	let mut p1wins = 0;
 	let mut p2wins = 0;
 
-	while let Some(state) = states.ckeys().next() {
-		let games_in_state = states.remove(&state).unwrap();
+	while let Some(state) = states.pop_first() {
+		let (state, games_in_state) = state;
 		for (add, mult1) in possibilities.citer() {
 			let new_p1 = state.p1 + add;
 			if new_p1.score >= 21 {
@@ -87,7 +91,7 @@ fn main() {
 	display(p1wins.max(p2wins));
 }
 
-type Map = HashMap<GameState, u64>;
+type Map = BTreeMap<GameState, u64>;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 struct GameState {
@@ -101,6 +105,23 @@ impl GameState {
 			p1: Player { pos: p1, score: 0 },
 			p2: Player { pos: p2, score: 0 },
 		}
+	}
+}
+
+impl PartialOrd for GameState {
+	fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+		Some(self.cmp(other))
+	}
+}
+
+impl Ord for GameState {
+	fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+		self.p1
+			.score
+			.cmp(&other.p1.score)
+			.then_with(|| self.p2.score.cmp(&other.p2.score))
+			.then_with(|| self.p1.pos.cmp(&other.p1.pos))
+			.then_with(|| self.p2.pos.cmp(&other.p2.pos))
 	}
 }
 
