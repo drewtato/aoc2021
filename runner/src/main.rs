@@ -4,7 +4,7 @@ use fs_extra::dir::CopyOptions;
 use pico_args::Arguments;
 use std::{
 	fs::{create_dir_all, read_to_string, File, OpenOptions},
-	io::Write,
+	io::{Read, Write},
 	path::Path,
 	process::{Command, Stdio},
 };
@@ -50,7 +50,10 @@ fn main() -> Result<()> {
 			}
 			"next" => {
 				let day = latest_day(&project_root)? + 1;
-				runner_options.runner(day)
+				let mut ro = runner_options;
+				ro.get_input = true;
+				ro.create_input_files(day)?;
+				ro.setup(day)
 			}
 			_ => {
 				let day = s.parse().map_err(|_| {
@@ -143,10 +146,23 @@ impl RunnerOptions<'_> {
 		Ok(input_file)
 	}
 
+	fn create_input_files(&self, day: u32) -> Result<()> {
+		write_to_file(
+			"",
+			self.project_root.join(format!("inputs/day{day:02}.txt")),
+		)?;
+		write_to_file(
+			"",
+			self.project_root.join(format!("inputs/test{day:02}.txt")),
+		)
+	}
+
 	fn setup(self, day: u32) -> Result<()> {
 		if self.get_input {
 			let input_path = self.project_root.join(format!("inputs/day{day:02}.txt"));
-			if !input_path.exists() {
+			let mut buf = Vec::new();
+			File::open(&input_path)?.read_to_end(&mut buf)?;
+			if !input_path.exists() || buf.is_empty() {
 				eprintln!("Getting input");
 				let url = input_url(day, self.year)?;
 				let client = Client::new();
