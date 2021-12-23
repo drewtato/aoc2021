@@ -51,7 +51,7 @@ fn main() -> Result<()> {
 			"next" => {
 				let day = latest_day(&project_root)? + 1;
 				let mut ro = runner_options;
-				ro.get_input = true;
+				ro.get_input = false;
 				ro.create_input_files(day)?;
 				ro.setup(day)
 			}
