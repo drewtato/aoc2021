@@ -2,6 +2,8 @@
 
 These are my solutions for Advent of Code 2021, this time in Rust.
 
+These run in under 3 seconds on my machine, when run sequentially and piped input from input files. Days 19, 20, and 25 are slowest. 20 and 25 are because of HashMap, while day 19 is just doing a lot of unnecessary computation. Besides those (probably about 2 seconds), the time is mostly overhead for piping the inputs. Most of the actual solutions run in about 10ms.
+
 ## Stats
 
 ```text

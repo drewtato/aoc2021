@@ -33,25 +33,38 @@ fn parser() -> Input {
 fn main() {
 	let (rule, mut grid) = parser();
 	// debug(inp);
-	for _ in 0..25 {
-		display_map(&grid);
+	for _ in 0..1 {
+		// display_map(&grid);
 		grid = enhance(&rule, grid);
-		display_map(&grid);
+		// display_map(&grid);
 		if rule[0] {
 			grid = enhance2(&rule, grid);
 		} else {
 			grid = enhance(&rule, grid);
 		}
 	}
-	display_map(&grid);
+	// display_map(&grid);
+
+	display(count_on(&grid));
+
+	for _ in 0..24 {
+		// display_map(&grid);
+		grid = enhance(&rule, grid);
+		// display_map(&grid);
+		if rule[0] {
+			grid = enhance2(&rule, grid);
+		} else {
+			grid = enhance(&rule, grid);
+		}
+	}
+	// display_map(&grid);
 
 	display(count_on(&grid));
 }
 
-#[allow(unused_variables)]
-fn display_map(grid: &Map) {
-	// display_2d_map(&grid.citer().map(|coord| (coord, "#")).collect(), ".");
-}
+// fn display_map(grid: &Map) {
+// 	display_2d_map(&grid.citer().map(|coord| (coord, "#")).collect(), ".");
+// }
 
 fn count_on(grid: &Map) -> usize {
 	grid.iter().count()
