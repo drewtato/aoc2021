@@ -1,7 +1,5 @@
-#![allow(unused_imports)]
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
-use helpers::itertools::Itertools;
 use helpers::*;
 
 type Input = Vec<(String, String)>;
@@ -66,6 +64,8 @@ fn num_paths<const ALLOW_SMALL_TWICE: bool>(map: &HashMap<Key, Vec<Key>>) -> usi
 	let mut visited = [0u8; 256];
 	let mut small_visited_twice = false;
 	let mut total = 0;
+
+	visited[i8_to_usize(START)] += 1;
 
 	while let Some(&mut (node, ref mut index_mut)) = path.last_mut() {
 		let index = *index_mut;

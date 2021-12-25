@@ -43,7 +43,7 @@ fn main() {
 	display_2d_map(
 		&dots
 			.iter()
-			.map(|&[x, y]| ([x as isize, y as isize], "#"))
+			.map(|&[x, y]| ([y as isize, x as isize], "#"))
 			.collect(),
 		" ",
 	);
