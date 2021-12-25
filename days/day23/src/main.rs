@@ -1,35 +1,44 @@
 #![feature(int_abs_diff)]
+#![feature(array_from_fn)]
 #![feature(array_windows)]
+use std::array;
 use std::iter::repeat;
 
 use helpers::itertools::Itertools;
 use helpers::*;
-use pathfinding::directed::dijkstra;
+use pathfinding::directed::dijkstra::dijkstra;
 use pathfinding::num_traits::AsPrimitive;
 
-type Input = [[Option<u8>; 11]; 3];
+type Input = Rooms<2>;
 
 type Hallway = [Option<u8>; 11];
 type Rooms<const N: usize> = [[Option<u8>; N]; 4];
 
-fn parser() -> Input {
-	let all = read_stdin()
-		.unwrap()
-		.trim()
-		.lines()
-		.map(|l| l.chars().collect_vec())
-		.collect_vec();
+const A: Option<u8> = Some(0);
+const B: Option<u8> = Some(1);
+const C: Option<u8> = Some(2);
+const D: Option<u8> = Some(3);
 
-	let mut map = [[None; 11]; 3];
-	map[1][2] = Some(all[2][3] as u8);
-	map[1][4] = Some(all[2][5] as u8);
-	map[1][6] = Some(all[2][7] as u8);
-	map[1][8] = Some(all[2][9] as u8);
-	map[2][2] = Some(all[3][1] as u8);
-	map[2][4] = Some(all[3][3] as u8);
-	map[2][6] = Some(all[3][5] as u8);
-	map[2][8] = Some(all[3][7] as u8);
-	map
+fn parser() -> Input {
+	let stdin = read_stdin().unwrap();
+	let mut lines = stdin.trim().lines();
+
+	let mut first = lines.nth(2).unwrap().chars().filter_map(|c| match c {
+		'A' => A,
+		'B' => B,
+		'C' => C,
+		'D' => D,
+		_ => None,
+	});
+	let mut second = lines.next().unwrap().chars().filter_map(|c| match c {
+		'A' => A,
+		'B' => B,
+		'C' => C,
+		'D' => D,
+		_ => None,
+	});
+
+	array::from_fn(|_| [first.next(), second.next()])
 }
 
 fn main() {
@@ -37,22 +46,14 @@ fn main() {
 
 	// Part 1
 	let hallway: Hallway = [None; 11];
-	let mut rooms: Rooms<2> = [[None; 2]; 4];
+	let rooms: Rooms<2> = inp;
 
-	for (y, row) in inp.iter().skip(1).enumerate() {
-		for (x, c) in row.citer().enumerate() {
-			if let Some(amph) = c {
-				rooms[(x - 2) / 2][y] = Some(amph - b'A');
-			}
-		}
-	}
-
-	let success: Rooms<2> = success_rooms();
-	let (_path, cost) =
-		dijkstra::dijkstra(&(hallway, rooms), successors::<2, false>, |(_, rooms)| {
-			rooms == &success
-		})
-		.unwrap();
+	let (_path, cost) = dijkstra(
+		&(hallway, rooms),
+		successors::<2, false>,
+		|(hallway, rooms)| hallway == &[None; 11] && rooms == &success_rooms(),
+	)
+	.unwrap();
 
 	display(cost);
 
@@ -60,42 +61,43 @@ fn main() {
 	let hallway: Hallway = [None; 11];
 	let mut rooms: Rooms<4> = [[None; 4]; 4];
 
-	let mut inp_iter = inp.iter().skip(1);
-	let (row1, row2) = inp_iter.next_tuple().unwrap();
-	for (y, row) in [(0, row1), (3, row2)] {
-		for (x, c) in row.citer().enumerate() {
-			if let Some(amph) = c {
-				rooms[(x - 2) / 2][y] = Some(amph - b'A');
-			}
-		}
-	}
-
-	for (y, row) in "DCBA\nDBAC".lines().enumerate() {
-		for (x, c) in row.as_bytes().citer().enumerate() {
-			rooms[x][y + 1] = Some(c - b'A');
-		}
+	for (i, room) in rooms.iter_mut().enumerate() {
+		room[0] = inp[i][0];
+		room[1] = MID_ROOMS[i][0];
+		room[2] = MID_ROOMS[i][1];
+		room[3] = inp[i][1];
 	}
 
 	// show_map(&hallway, &rooms);
 
-	let success: Rooms<4> = success_rooms();
-	let (_path, cost) =
-		dijkstra::dijkstra(&(hallway, rooms), successors::<4, false>, |(_, rooms)| {
-			rooms == &success
-		})
-		.unwrap();
+	let (_path, cost) = dijkstra(
+		&(hallway, rooms),
+		successors::<4, false>,
+		|(hallway, rooms)| hallway == &[None; 11] && rooms == &success_rooms(),
+	)
+	.unwrap();
+	// A* was slower.
+	// let (_path, cost) = astar(
+	// 	&(hallway, rooms),
+	// 	successors::<4, false>,
+	// 	heuristic,
+	// 	|(_, rooms)| rooms == &success,
+	// )
+	// .unwrap();
 
 	display(cost);
 }
 
-fn success_rooms<const N: usize>() -> Rooms<N> {
+const MID_ROOMS: Rooms<2> = [[D, D], [C, B], [B, A], [A, C]];
+
+const fn success_rooms<const N: usize>() -> Rooms<N> {
 	[[Some(0); N], [Some(1); N], [Some(2); N], [Some(3); N]]
 }
 
 fn show_map<const N: usize>(hallway: &Hallway, rooms: &Rooms<N>) {
 	display(
 		hallway
-			.citer()
+			.iter()
 			.map(|c| match c {
 				Some(0) => 'A',
 				Some(1) => 'B',
@@ -128,18 +130,46 @@ fn show_map<const N: usize>(hallway: &Hallway, rooms: &Rooms<N>) {
 	// input::<String>();
 }
 
+// fn heuristic<const N: usize>((hallway, rooms): &(Hallway, Rooms<N>)) -> u32 {
+// 	let mut cost = 0;
+// 	for (x, room) in rooms.iter().enumerate() {
+// 		let mut blocked = false;
+// 		for (y, cell) in room.iter().enumerate() {
+// 			let y = y as u32;
+// 			if let &Some(amph) = cell {
+// 				if !blocked && amph as usize == x {
+// 					continue;
+// 				}
+// 				blocked = true;
+// 				cost += cost_to_move(amph) * (2 + y);
+// 				cost += cost_to_move(x) * (2 + y);
+// 			} else {
+// 				cost += cost_to_move(x) * (2 + y);
+// 			}
+// 		}
+// 	}
+
+// 	for end in [hallway.first().unwrap(), hallway.last().unwrap()] {
+// 		if let &Some(amph) = end {
+// 			cost += cost_to_move(amph);
+// 		}
+// 	}
+
+// 	cost
+// }
+
 fn successors<const N: usize, const DEBUG: bool>(
 	(hallway, rooms): &(Hallway, Rooms<N>),
 ) -> impl IntoIterator<Item = ((Hallway, Rooms<N>), u32)> {
 	// show_map(hallway, rooms);
 	let mut succ = vec![];
-	for (i, cell) in hallway.citer().enumerate() {
-		if let Some(amph) = cell {
+	for (i, cell) in hallway.iter().enumerate() {
+		if let &Some(amph) = cell {
 			let amph = amph as usize;
 			let dest = (amph + 1) * 2;
 			if rooms[amph][0].is_none()
 				&& rooms[amph]
-					.citer()
+					.iter()
 					.all(|c| c.is_none() || c.unwrap() as usize == amph)
 				&& (((i as isize + 1).min(dest as isize))..=((i as isize - 1).max(dest as isize)))
 					.all(|n| hallway[n as usize].is_none())
@@ -159,9 +189,9 @@ fn successors<const N: usize, const DEBUG: bool>(
 	for (x, room) in rooms.iter().enumerate() {
 		for (y, &two) in room.array_windows().enumerate() {
 			let buried = room
-				.citer()
+				.iter()
 				.skip(y + 2)
-				.any(|c| c.is_some() && c != Some(x as u8));
+				.any(|c| c.is_some() && c != &Some(x as u8));
 			match two {
 				[None, Some(b)] if b as usize != x || buried => {
 					if DEBUG {
@@ -189,14 +219,14 @@ fn successors<const N: usize, const DEBUG: bool>(
 
 		if let Some(a) = room[0] {
 			let a = a as usize;
-			if a != x || room.citer().any(|c| !(c.is_none() || c == Some(x as u8))) {
+			if a != x || room.iter().any(|c| !(c.is_none() || c == &Some(x as u8))) {
 				let hall_index = (x + 1) * 2;
 				for left in (0..hall_index).rev() {
+					if is_next_to_room(left) {
+						continue;
+					}
 					if hallway[left].is_some() {
 						break;
-					}
-					if [2, 4, 6, 8].contains(&left) {
-						continue;
 					}
 					succ.push((
 						(add_hall(hallway, left, a), del_rooms(rooms, [x, 0])),
@@ -204,11 +234,11 @@ fn successors<const N: usize, const DEBUG: bool>(
 					));
 				}
 				for right in (hall_index + 1)..hallway.len() {
+					if is_next_to_room(right) {
+						continue;
+					}
 					if hallway[right].is_some() {
 						break;
-					}
-					if [2, 4, 6, 8].contains(&right) {
-						continue;
 					}
 					succ.push((
 						(add_hall(hallway, right, a), del_rooms(rooms, [x, 0])),
@@ -227,6 +257,12 @@ fn successors<const N: usize, const DEBUG: bool>(
 		}
 	}
 	succ
+}
+
+fn is_next_to_room(hall_index: usize) -> bool {
+	[
+		false, false, true, false, true, false, true, false, true, false, false,
+	][hall_index]
 }
 
 fn move_rooms<const N: usize>(
